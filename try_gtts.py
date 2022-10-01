@@ -34,7 +34,7 @@ if __name__ == "__main__":
     make_mp3s()
     
     mp3s = [os.path.join(os.getcwd(), "mp3", fn) for fn in os.listdir("mp3")]  
-    for _ in range(20):
+    while True:
         fp = random.choice(mp3s)
         print("play", fp)
         play(fp)
