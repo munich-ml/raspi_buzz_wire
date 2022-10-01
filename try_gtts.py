@@ -1,6 +1,8 @@
 from gtts import gTTS
 from playsound import playsound
-import os, random, time
+import os, random, time, sys
+
+WINDOWS = "win" in sys.platform
 
 def make_mp3s():
     texts = ["Du hast verkackt",
@@ -21,6 +23,12 @@ def make_mp3s():
         gTTS(text, lang="de").save(os.path.join("mp3", fn+".mp3"))
 
 
+def play(fp: str):
+    if WINDOWS:
+        playsound(fp)
+    else:    # on raspi
+        os.system(f"cvlc --play-and-exit {fp}")
+
 
 if __name__ == "__main__":
     make_mp3s()
@@ -28,5 +36,6 @@ if __name__ == "__main__":
     mp3s = [os.path.join(os.getcwd(), "mp3", fn) for fn in os.listdir("mp3")]  
     for _ in range(20):
         fp = random.choice(mp3s)
-        playsound(fp)
+        print("play", fp)
+        play(fp)
         time.sleep(1)
