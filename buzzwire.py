@@ -69,7 +69,7 @@ while True:
             if get_wire('touch'):
                 add_one_touch()
             
-        elif get_wire('finish'):
+        if get_wire('finish'):
             go_finished()    
             
         elif time.time() - time_started > MAX_TIME_IN_START_S:
