@@ -1,7 +1,10 @@
 import logging, os, time
 from enum import Enum
+import RPi.GPIO as gpio
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(funcName)15s | %(message)s')
+
+# constants #############################################################################
 MAX_TIME_IN_START_S = 60     # After this time in state 'started', the game is aborted
 time_started: time.time      # store the time when started
 
@@ -10,9 +13,21 @@ class State(Enum):
     started = 1
     finished = 2    
 
-wire_start = False
-wire_finish = False
-wire_touch = False
+# setup GPIOs ###########################################################################
+gpio_numbers = {"start": 10,
+                "finish": 9,
+                "touch": 11}
+
+gpio.setwarnings(False)
+gpio.setmode(gpio.BCM)
+for gpio_number in gpio_numbers.values():
+    gpio.setup(gpio_number, gpio.IN, pull_up_down=gpio.PUD_OFF)
+
+wire_start = not(gpio.input(gpio_numbers["start"]))
+wire_finish = not(gpio.input(gpio_numbers["finish"]))
+wire_touch = not(gpio.input(gpio_numbers["touch"]))
+
+# init ##################################################################################
 state = State.waiting     # Initial state
 
 def go_started():
