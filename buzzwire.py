@@ -2,6 +2,7 @@ import logging, os, time
 from enum import Enum
 import threading
 import RPi.GPIO as gpio
+from gtts import gTTS
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(funcName)15s | %(message)s')
 
@@ -33,8 +34,9 @@ def play_sound(fp: str):
     os.system(f"cvlc --play-and-exit {fp}")
 
 class StateMachine:
-    def __init__(self, upon_start, upon_touch, upon_finish, upon_abort) -> None:
+    def __init__(self, upon_start, upon_about_to_start, upon_touch, upon_finish, upon_abort) -> None:
         self.upon_start = upon_start    # function to be called upon State.started entry
+        self.upon_about_to_start = upon_about_to_start 
         self.upon_touch = upon_touch    # function to be called upon State.touched entry
         self.upon_finish = upon_finish  # function to be called upon State.finished entry
         self.upon_abort = upon_abort    # function to be called upon abort_started call
@@ -62,8 +64,20 @@ class StateMachine:
     def go_finished(self):
         self.state = State.finished
         t = time.time() - self.time_started
-        ctr = self.touch_ctr
-        logging.info(f"Finished with {ctr=}, {t=}.")
+        s = "Geschafft in {:.1f} Sekunden "
+        if self.touch_ctr == 0:
+            s += "ohne Fehler."
+        elif self.touch_ctr == 1:
+            s += "mit einem Fehler."
+        else:
+            s += "mit {} Fehlern.".format(self.touch_ctr)
+        logging.info(s)
+        fp = os.path.join("mp3", "finished.mp3")
+        logging.info("1")
+        gTTS(s, lang="de").save(fp)
+        logging.info("2")
+        play_sound(fp)
+        logging.info("3")
         self.upon_finish()
 
     def go_waiting(self):
@@ -78,6 +92,8 @@ class StateMachine:
         
 def upon_start():
     logging.info("Starting ...")
+
+def upon_about_to_start():
     play_sound(os.path.join("mp3", "los_gehts.mp3"))
 
 def upon_touch():
@@ -89,7 +105,7 @@ def upon_finish():
 def upon_abort():
     logging.info("Abort")
 
-sm = StateMachine(upon_start, upon_touch, upon_finish, upon_abort)
+sm = StateMachine(upon_start, upon_about_to_start, upon_touch, upon_finish, upon_abort)
 
 def log_periodically():
     while True:
