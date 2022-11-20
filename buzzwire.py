@@ -51,7 +51,7 @@ def add_one_touch():
 
 def abort_started():
     logging.info("Game took too long, move to state='waiting'")
-    state = State.waiting
+    state = State.started
 
 def log_periodically():
     while True:
