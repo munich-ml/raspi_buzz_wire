@@ -1,8 +1,11 @@
-import logging, os, time
-from enum import Enum
-import threading
+import os, threading, time
+import datetime as dt
 import RPi.GPIO as gpio
+from enum import Enum
 from gtts import gTTS
+
+# setup logging##########################################################################
+import logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(funcName)15s | %(message)s')
 
@@ -28,10 +31,59 @@ for gpio_number in GPIO_NUMBERS.values():
     gpio.setup(gpio_number, gpio.IN, pull_up_down=gpio.PUD_OFF)
 
 def get_wire(name: str = "start") -> bool:
+    """Polls the Raspi GPIO pin
+
+    Args:
+        name (str): GPIO name out of ("start", "finish", "touch")
+
+    Returns:
+        bool: True means active pull down, False mease inactive
+    """
     return not(gpio.input(GPIO_NUMBERS[name]))
 
 def play_sound(fp: str):
+    """Play sound on raspberry pi
+
+    Args:
+        fp (str): Filepath
+    """
     os.system(f"cvlc --play-and-exit {fp}")
+
+def save_record(ctr: int, t: float, dir_: str = "records") -> tuple[int, int]:
+    """Saves the record
+
+    Args:
+        ctr (int): Error count
+        t (float): Time to complete the game
+        dir_ (str, optional): Name of the directory. Defaults to "records".
+
+    Returns:
+        tuple[int, int]: Return (rank, records_cnt) as tuple
+    """
+    # Create error str with 3 digits like 002
+    err = str(int(ctr))
+    while len(err) < 3:
+        err = "0" + err
+    
+    # Create milliseconds str with 6 digits like 001000 for 1s
+    ms = str(int(t * 1000))
+    while len(ms) < 6:
+        ms = "0" + ms
+    
+    # Join filename str with datetime str
+    fn = "e{}_{}ms_".format(err, ms)
+    fn += dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    
+    # Save data as filename
+    if dir_ not in os.listdir():
+        os.mkdir(dir_)
+    open(os.path.join(dir_, fn), "w")
+    
+    # Compute rank and records_cnt for return
+    all_records = sorted(os.listdir(dir_))
+    rank = all_records.index(fn) +1
+    records_cnt = len(all_records)
+    return (rank, records_cnt)
 
 class StateMachine:
     def __init__(self, upon_start, upon_about_to_start, upon_touch, upon_finish, upon_abort) -> None:
@@ -50,6 +102,7 @@ class StateMachine:
     def go_about_to_start(self):
         self.touch_ctr = 0
         self.time_started = time.time()
+        self.upon_about_to_start()
         self.state = State.about_to_start
 
     def go_started(self):
@@ -62,15 +115,27 @@ class StateMachine:
         self.upon_touch()
         
     def go_finished(self):
+        """Switch state machine to the State.finished
+        """
         self.state = State.finished
-        t = time.time() - self.time_started
+        
+        # time to complete the game
+        t = time.time() - self.time_started  
+        
+        # save the records and compute the rank
+        rank, recorts_cnt = save_record(self.touch_ctr, t)
+        
+        # Create a str for voice output
         s = "Geschafft in {:.1f} Sekunden ".format(t)
         if self.touch_ctr == 0:
             s += "ohne Treffer"
         elif self.touch_ctr == 1:
             s += "mit einem Treffer."
         else:
-            s += "mit {} Treffern.".format(self.touch_ctr)
+            s += "mit {} Treffern. ".format(self.touch_ctr)
+        
+        s += "Das ist Platz {} aus {}.".format(rank, recorts_cnt)
+        
         logging.info(s)
         fp = os.path.join("mp3", "finished.mp3")
         gTTS(s, lang="de").save(fp)
