@@ -1,5 +1,6 @@
 import logging, os, time
 from enum import Enum
+import threading
 import RPi.GPIO as gpio
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(funcName)15s | %(message)s')
@@ -52,9 +53,15 @@ def abort_started():
     logging.info("Game took too long, move to state='waiting'")
     state = State.waiting
 
+def log_periodically():
+    while True:
+        logging.info(state)
+        time.sleep(1)
+        
+threading.Thread(target=log_periodically).start()
 
 logging.info("Starting main loop ...")
-    
+
 while True:   
     time.sleep(0.05)  # give room to other os processes
     if state == State.waiting:
