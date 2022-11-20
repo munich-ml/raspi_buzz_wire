@@ -23,9 +23,6 @@ gpio.setmode(gpio.BCM)
 for gpio_number in gpio_numbers.values():
     gpio.setup(gpio_number, gpio.IN, pull_up_down=gpio.PUD_OFF)
 
-wire_start = not(gpio.input(gpio_numbers["start"]))
-wire_finish = not(gpio.input(gpio_numbers["finish"]))
-wire_touch = not(gpio.input(gpio_numbers["touch"]))
 
 # init ##################################################################################
 state = State.waiting     # Initial state
@@ -55,6 +52,10 @@ logging.info("Starting main loop ...")
 
 while True:
     time.sleep(0.2)
+    wire_start = not(gpio.input(gpio_numbers["start"]))
+    wire_finish = not(gpio.input(gpio_numbers["finish"]))
+    wire_touch = not(gpio.input(gpio_numbers["touch"]))
+
     logging.info(f"{wire_start=}\t{wire_finish=}\t{wire_touch=}")
 #while True:   
 #    time.sleep(0.05)  # give room to other os processes
