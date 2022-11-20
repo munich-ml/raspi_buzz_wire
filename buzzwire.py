@@ -64,11 +64,11 @@ class StateMachine:
     def go_finished(self):
         self.state = State.finished
         t = time.time() - self.time_started
-        s = "Geschafft in {:.1f} Sekunden "
+        s = "Geschafft in {:.1f} Sekunden ".format(t)
         if self.touch_ctr == 0:
-            s += "ohne Fehler."
+            s += "ohne Fähler."
         elif self.touch_ctr == 1:
-            s += "mit einem Fehler."
+            s += "mit einem Feeler."
         else:
             s += "mit {} Fehlern.".format(self.touch_ctr)
         logging.info(s)
