@@ -33,25 +33,30 @@ touched = False           # Touch state
 
 def go_started():
     logging.info("Entering State.started")
+    global state, time_started, touched    
     time_started = time.time()
-    touched = False    
+    touched = False
     state = State.started
 
 def go_finished():
     logging.info("Entering State.finished")
+    global state
     state = State.finished
 
 def go_waiting():
     logging.info("Entering State.waiting")
+    global state
     state = State.waiting
 
 def add_one_touch():
-    touched = True
     logging.info("Autsch")
+    global touched
+    touched = True
 
 def abort_started():
     logging.info("Game took too long, move to state='waiting'")
-    state = State.started
+    global state
+    state = State.waiting
 
 def log_periodically():
     while True:
