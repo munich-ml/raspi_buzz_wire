@@ -28,10 +28,12 @@ def get_wire(name: str = "start") -> bool:
 
 # init ##################################################################################
 state = State.waiting     # Initial state
+touched = False           # Touch state
 
 def go_started():
     logging.info("Entering State.started")
-    time_started = time.time()    
+    time_started = time.time()
+    touched = False    
     state = State.started
 
 def go_finished():
@@ -43,7 +45,8 @@ def go_waiting():
     state = State.waiting
 
 def add_one_touch():
-    logging.info("")
+    touched = True
+    logging.info("Autsch")
 
 def abort_started():
     logging.info("Game took too long, move to state='waiting'")
@@ -51,31 +54,29 @@ def abort_started():
 
 
 logging.info("Starting main loop ...")
-
-while True:
-    logging.info(f"{get_wire('start')=}\t{get_wire('finish')=}\t{get_wire('touch')=}")
     
-#while True:   
-#    time.sleep(0.05)  # give room to other os processes
-#    if state == State.waiting:
-#        if wire_start:
-#            go_started()
-#    
-#    elif state == State.started:
-#        if wire_start:
-#            go_started()
-#        
-#        elif wire_touch:
-#            add_one_touch()
-#            
-#        elif wire_finish:
-#            go_finished()    
-#            
-#        elif time.time() - time_started > MAX_TIME_IN_START_S:
-#            abort_started()
-#        
-#    elif state == State.finished:
-#        go_waiting()
+while True:   
+    time.sleep(0.05)  # give room to other os processes
+    if state == State.waiting:
+        if get_wire('start'):
+            go_started()
+    
+    elif state == State.started:
+        if get_wire('start'):
+            go_started()
+        
+        elif not touched:
+            if get_wire('touch'):
+                add_one_touch()
+            
+        elif get_wire('finish'):
+            go_finished()    
+            
+        elif time.time() - time_started > MAX_TIME_IN_START_S:
+            abort_started()
+        
+    elif state == State.finished:
+        go_waiting()
         
 
     
