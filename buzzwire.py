@@ -134,7 +134,7 @@ class StateMachine:
         else:
             s += "mit {} Treffern. ".format(self.touch_ctr)
         
-        s += "Das ist Platz {} aus {}.".format(rank, recorts_cnt)
+        s += "Das ist Platz {} aus {}".format(rank, recorts_cnt)
         
         logging.info(s)
         fp = os.path.join("mp3", "finished.mp3")
