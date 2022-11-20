@@ -53,8 +53,6 @@ def abort_started():
 logging.info("Starting main loop ...")
 
 while True:
-    time.sleep(0.2)
-
     logging.info(f"{get_wire('start')=}\t{get_wire('finish')=}\t{get_wire('touch')=}")
     
 #while True:   
