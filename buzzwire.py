@@ -49,10 +49,9 @@ class StateMachine:
         self.state = State.about_to_start
 
     def go_started(self):
-        if self.state == State.waiting:
-            self.time_started = time.time()
-            self.touch_ctr = 0
-            self.upon_start()
+        self.time_started = time.time()
+        self.touch_ctr = 0
+        self.upon_start()
         self.state = State.started
         
     def go_touched(self):
