@@ -73,11 +73,8 @@ class StateMachine:
             s += "mit {} Treffern.".format(self.touch_ctr)
         logging.info(s)
         fp = os.path.join("mp3", "finished.mp3")
-        logging.info("1")
         gTTS(s, lang="de").save(fp)
-        logging.info("2")
         play_sound(fp)
-        logging.info("3")
         self.upon_finish()
 
     def go_waiting(self):
