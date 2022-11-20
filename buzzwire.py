@@ -14,15 +14,17 @@ class State(Enum):
     finished = 2    
 
 # setup GPIOs ###########################################################################
-gpio_numbers = {"start": 10,
+GPIO_NUMBERS = {"start": 10,
                 "finish": 9,
                 "touch": 11}
 
 gpio.setwarnings(False)
 gpio.setmode(gpio.BCM)
-for gpio_number in gpio_numbers.values():
+for gpio_number in GPIO_NUMBERS.values():
     gpio.setup(gpio_number, gpio.IN, pull_up_down=gpio.PUD_OFF)
 
+def get_wire(name: str = "start") -> bool:
+    return not(gpio.input(GPIO_NUMBERS[name]))
 
 # init ##################################################################################
 state = State.waiting     # Initial state
@@ -52,11 +54,9 @@ logging.info("Starting main loop ...")
 
 while True:
     time.sleep(0.2)
-    wire_start = not(gpio.input(gpio_numbers["start"]))
-    wire_finish = not(gpio.input(gpio_numbers["finish"]))
-    wire_touch = not(gpio.input(gpio_numbers["touch"]))
 
-    logging.info(f"{wire_start=}\t{wire_finish=}\t{wire_touch=}")
+    logging.info(f"{get_wire('start')=}\t{get_wire('finish')=}\t{get_wire('touch')=}")
+    
 #while True:   
 #    time.sleep(0.05)  # give room to other os processes
 #    if state == State.waiting:
