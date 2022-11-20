@@ -66,11 +66,11 @@ class StateMachine:
         t = time.time() - self.time_started
         s = "Geschafft in {:.1f} Sekunden ".format(t)
         if self.touch_ctr == 0:
-            s += "ohne Fähler."
+            s += "ohne Treffer"
         elif self.touch_ctr == 1:
-            s += "mit einem Feeler."
+            s += "mit einem Treffer."
         else:
-            s += "mit {} Fehlern.".format(self.touch_ctr)
+            s += "mit {} Treffern.".format(self.touch_ctr)
         logging.info(s)
         fp = os.path.join("mp3", "finished.mp3")
         logging.info("1")
