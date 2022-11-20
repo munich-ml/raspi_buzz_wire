@@ -29,8 +29,8 @@ for gpio_number in GPIO_NUMBERS.values():
 def get_wire(name: str = "start") -> bool:
     return not(gpio.input(GPIO_NUMBERS[name]))
 
-# init ##################################################################################
-
+def play_sound(fp: str):
+    os.system(f"cvlc --play-and-exit {fp}")
 
 class StateMachine:
     def __init__(self, upon_start, upon_touch, upon_finish, upon_abort) -> None:
@@ -76,9 +76,9 @@ class StateMachine:
         self.upon_abort()
         self.state = State.waiting
         
-
 def upon_start():
     logging.info("Starting ...")
+    play_sound(os.path.join("mp3", "los_gehts.mp3"))
 
 def upon_touch():
     logging.info("Autsch!!")
@@ -99,6 +99,7 @@ def log_periodically():
 threading.Thread(target=log_periodically).start()
 
 logging.info("Starting main loop ...")
+play_sound(os.path.join("mp3", "lasset_die_Spiele_beginnen.mp3"))
 
 while True:   
     time.sleep(0.05)  # give room to other os processes
