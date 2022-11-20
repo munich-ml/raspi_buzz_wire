@@ -52,27 +52,31 @@ def abort_started():
 
 
 logging.info("Starting main loop ...")
-while True:   
-    time.sleep(0.05)  # give room to other os processes
-    if state == State.waiting:
-        if wire_start:
-            go_started()
-    
-    elif state == State.started:
-        if wire_start:
-            go_started()
-        
-        elif wire_touch:
-            add_one_touch()
-            
-        elif wire_finish:
-            go_finished()    
-            
-        elif time.time() - time_started > MAX_TIME_IN_START_S:
-            abort_started()
-        
-    elif state == State.finished:
-        go_waiting()
+
+while True:
+    time.sleep(0.2)
+    logging.info(f"{wire_start=}\t{wire_finish=}\t{wire_touch=}")
+#while True:   
+#    time.sleep(0.05)  # give room to other os processes
+#    if state == State.waiting:
+#        if wire_start:
+#            go_started()
+#    
+#    elif state == State.started:
+#        if wire_start:
+#            go_started()
+#        
+#        elif wire_touch:
+#            add_one_touch()
+#            
+#        elif wire_finish:
+#            go_finished()    
+#            
+#        elif time.time() - time_started > MAX_TIME_IN_START_S:
+#            abort_started()
+#        
+#    elif state == State.finished:
+#        go_waiting()
         
 
     
