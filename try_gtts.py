@@ -1,5 +1,4 @@
 from gtts import gTTS
-from playsound import playsound
 import os, random, time, sys
 
 WINDOWS = "win" in sys.platform
@@ -25,6 +24,7 @@ def make_mp3s():
 
 def play(fp: str):
     if WINDOWS:
+        from playsound import playsound
         playsound(fp)
     else:    # on raspi
         os.system(f"cvlc --play-and-exit {fp}")
