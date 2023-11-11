@@ -49,6 +49,10 @@ def set_led(name: str = "green", on: bool = True):
     else:
         gpio.output(led, gpio.HIGH)
 
+for led_name, gpio_number in GPIO_OUTPUTS.itmes():
+    gpio.setup(gpio_number, gpio.OUT)
+    set_led(led_name, on=False)
+
 
 def play_sound(fp: str):
     """Play sound on raspberry pi
