@@ -49,7 +49,7 @@ def set_led(name: str = "green", on: bool = True):
     else:
         gpio.output(led, gpio.HIGH)
 
-for led_name, gpio_number in GPIO_OUTPUTS.itmes():
+for led_name, gpio_number in GPIO_OUTPUTS.items():
     gpio.setup(gpio_number, gpio.OUT)
     set_led(led_name, on=False)
 
