@@ -21,9 +21,7 @@ class State(Enum):
     finished = 4
 
 # setup GPIOs ###########################################################################
-GPIO_NUMBERS = {"start": 10,
-                "finish": 9,
-                "touch": 11}
+GPIO_NUMBERS = {"start": 9, "finish": 10, "touch": 11}
 
 gpio.setwarnings(False)
 gpio.setmode(gpio.BCM)
