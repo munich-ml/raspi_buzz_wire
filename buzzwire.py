@@ -101,6 +101,28 @@ def save_record(ctr: int, t: float, dir_: str = "records") -> tuple[int, int]:
     records_cnt = len(all_records)
     return (rank, records_cnt)
 
+
+class LedTimer(threading.Thread):
+    def __init__(self, led_name: str = "green", interval = 0.12):
+        super(LedTimer, self).__init__()
+        self.interval = interval
+        self.led_name = led_name
+        self.pointer  = 0
+        self.exit = False
+        self.sequence = "10000000"
+        
+    def run(self):
+        while not self.exit:
+            set_led(self.led_name, self.sequence[self.pointer])
+            self.pointer += 1
+            if self.pointer >= len(self.sequence):
+                self.pointer = 0
+            time.sleep(self.interval)
+
+green_led = LedTimer(led_name="green")
+green_led.start()
+
+
 class StateMachine:
     def __init__(self, upon_start, upon_about_to_start, upon_touch, upon_finish, upon_abort) -> None:
         self.upon_start = upon_start    # function to be called upon State.started entry
@@ -170,6 +192,7 @@ class StateMachine:
         
 def upon_start():
     logging.info("Starting ...")
+    green_led.sequence = "10101000"
 
 def upon_about_to_start():
     play_sound(os.path.join("mp3", "los_gehts.mp3"))
@@ -177,34 +200,23 @@ def upon_about_to_start():
 def upon_touch():
     logging.info("Autsch!!")
 
+    def switch_led_period(led_name: str = "red", period = 0.5):
+        set_led(led_name, True)
+        time.sleep(period)
+        set_led(led_name, False)
+    threading.Thread(target=switch_led_period).start()
+
 def upon_finish():
     logging.info("Finished")
+    green_led.sequence = "10000000"
 
 def upon_abort():
     logging.info("Abort")
-
-
-class LedTimer(threading.Thread):
-    def __init__(self, led_name: str = "green", interval = 0.12):
-        super(LedTimer, self).__init__()
-        self.interval = interval
-        self.led_name = led_name
-        self.pointer  = 0
-        self.exit = False
-        self.sequence = "00000000"
-        
-    def run(self):
-        while not self.exit:
-            set_led(self.led_name, self.sequence[self.pointer])
-            self.pointer += 1
-            if self.pointer >= len(self.sequence):
-                self.pointer = 0
-            time.sleep(self.interval)
+    green_led.sequence = "10000000"
 
 
 sm = StateMachine(upon_start, upon_about_to_start, upon_touch, upon_finish, upon_abort)
-green_led = LedTimer(led_name="green")
-green_led.start()
+
 
 
 logging.info("Starting main loop ...")
@@ -214,7 +226,6 @@ while True:
     time.sleep(0.01)  # give room to other os processes
     
     if sm.state == State.waiting:
-        green_led.sequence = "10000000"
         if get_wire('start'):
             sm.go_about_to_start()
     
@@ -223,7 +234,6 @@ while True:
             sm.go_started()
     
     elif sm.state == State.started:
-        green_led.sequence = "10101000"
         if get_wire('start'):
             sm.go_about_to_start()
         
