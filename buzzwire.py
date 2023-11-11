@@ -21,11 +21,12 @@ class State(Enum):
     finished = 4
 
 # setup GPIOs ###########################################################################
-GPIO_NUMBERS = {"start": 9, "finish": 10, "touch": 11}
-
 gpio.setwarnings(False)
 gpio.setmode(gpio.BCM)
-for gpio_number in GPIO_NUMBERS.values():
+
+GPIO_INPUTS = {"start": 9, "finish": 10, "touch": 11}
+
+for gpio_number in GPIO_INPUTS.values():
     gpio.setup(gpio_number, gpio.IN, pull_up_down=gpio.PUD_OFF)
 
 def get_wire(name: str = "start") -> bool:
@@ -37,7 +38,17 @@ def get_wire(name: str = "start") -> bool:
     Returns:
         bool: True means active pull down, False mease inactive
     """
-    return not(gpio.input(GPIO_NUMBERS[name]))
+    return not(gpio.input(GPIO_INPUTS[name]))
+
+GPIO_OUTPUTS = {"green": 13, "red": 26}
+
+def set_led(name: str = "green", on: bool = True):
+    led = GPIO_OUTPUTS[name]
+    if on in (True, "1", 1):
+        gpio.output(led, gpio.LOW)   # inverted in hardware
+    else:
+        gpio.output(led, gpio.HIGH)
+
 
 def play_sound(fp: str):
     """Play sound on raspberry pi
@@ -165,7 +176,28 @@ def upon_finish():
 def upon_abort():
     logging.info("Abort")
 
+
+class LedTimer(threading.Thread):
+    def __init__(self, led_name: str = "green", interval = 0.12):
+        super(LedTimer, self).__init__()
+        self.inverval = interval
+        self.led_name = led_name
+        self.pointer  = 0
+        self.exit = False
+        self.sequence = "00000000"
+        
+    def run(self):
+        while not self.exit:
+            set_led(self.led_name, self.sequence[self.pointer])
+            self.pointer += 1
+            if self.pointer >= len(self.seqRed):
+                self.pointer = 0
+            time.sleep(self.interval)
+
+
 sm = StateMachine(upon_start, upon_about_to_start, upon_touch, upon_finish, upon_abort)
+green_led = LedTimer(led_name="green")
+green_led.start()
 
 def log_periodically():
     while True:
@@ -178,9 +210,10 @@ logging.info("Starting main loop ...")
 play_sound(os.path.join("mp3", "lasset_die_Spiele_beginnen.mp3"))
 
 while True:   
-    time.sleep(0.05)  # give room to other os processes
+    time.sleep(0.01)  # give room to other os processes
     
     if sm.state == State.waiting:
+        green_led.sequence = "10000000"
         if get_wire('start'):
             sm.go_about_to_start()
     
@@ -189,6 +222,7 @@ while True:
             sm.go_started()
     
     elif sm.state == State.started:
+        green_led.sequence = "10101000"
         if get_wire('start'):
             sm.go_about_to_start()
         
