@@ -6,7 +6,7 @@ from gtts import gTTS
 
 # setup logging##########################################################################
 import logging
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.INFO, filename="logging.txt",
                     format='%(asctime)s | %(funcName)15s | %(message)s')
 
 # constants #############################################################################
