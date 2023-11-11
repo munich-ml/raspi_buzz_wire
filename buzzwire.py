@@ -60,7 +60,10 @@ def play_sound(fp: str):
     Args:
         fp (str): Filepath
     """
-    os.system(f"cvlc --play-and-exit {fp}")
+    def __play_sound():
+        os.system(f"cvlc --play-and-exit {fp}")
+    threading.Thread(target=__play_sound).start()
+    
 
 def save_record(ctr: int, t: float, dir_: str = "records") -> tuple[int, int]:
     """Saves the record
@@ -203,12 +206,6 @@ sm = StateMachine(upon_start, upon_about_to_start, upon_touch, upon_finish, upon
 green_led = LedTimer(led_name="green")
 green_led.start()
 
-def log_periodically():
-    while True:
-        logging.info(sm)
-        time.sleep(1)
-        
-threading.Thread(target=log_periodically).start()
 
 logging.info("Starting main loop ...")
 play_sound(os.path.join("mp3", "lasset_die_Spiele_beginnen.mp3"))
