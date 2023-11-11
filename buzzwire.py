@@ -194,7 +194,7 @@ class LedTimer(threading.Thread):
         while not self.exit:
             set_led(self.led_name, self.sequence[self.pointer])
             self.pointer += 1
-            if self.pointer >= len(self.seqRed):
+            if self.pointer >= len(self.sequence):
                 self.pointer = 0
             time.sleep(self.interval)
 
