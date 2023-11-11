@@ -184,7 +184,7 @@ def upon_abort():
 class LedTimer(threading.Thread):
     def __init__(self, led_name: str = "green", interval = 0.12):
         super(LedTimer, self).__init__()
-        self.inverval = interval
+        self.interval = interval
         self.led_name = led_name
         self.pointer  = 0
         self.exit = False
